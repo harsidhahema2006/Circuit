@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Electric Circuit Solver</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="shortcut icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+    <div class="container">
+        <h1>⚡ Electric Circuit Solver ⚡</h1>
+        <p>Enter your circuit details to calculate Mesh Currents, Thevenin and Norton Equivalents.</p>
+
+        <form method="POST" action="/">
+            <label for="loops">Number of Loops:</label>
+            <input type="number" id="loops" name="loops" min="1" required value="{{ loops if loops else '' }}">
+
+            <div id="loopInputs">
+                {% if loops %}
+                {% for i in range(1, loops+1) %}
+                <h3>Loop {{ i }}</h3>
+                <label>Voltage (V):</label>
+                <input type="number" step="any" name="voltage_{{ i }}" required>
+                <label>Self Resistance (Ω) (excluding shared):</label>
+                <input type="number" step="any" name="resistance_{{ i }}" required>
+                {% endfor %}
+
+                <h3>Shared Resistances</h3>
+                {% for i in range(1, loops+1) %}
+                {% for j in range(i+1, loops+1) %}
+                <label>Shared Resistance between Loop {{ i }} and Loop {{ j }} (Ω):</label>
+                <input type="number" step="any" name="shared_{{ i }}_{{ j }}">
+                {% endfor %}
+                {% endfor %}
+
+                <label>Select Loop for Thevenin/Norton:</label>
+                <input type="number" min="1" max="{{ loops }}" name="selected_loop" value="1">
+                {% endif %}
+            </div>
+
+            <button type="submit">Solve Circuit</button>
+        </form>
+
+        {% if results %}
+        <div class="result" id="result">
+            {% if results.error %}
+            <p style="color:red;">{{ results.error }}</p>
+            {% else %}
+            <pre>{{ results | tojson(indent=2) }}</pre>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+
+    <script>
+        const loopsInput = document.getElementById('loops');
+        const loopInputsDiv = document.getElementById('loopInputs');
+
+        const updateForm = () => {
+            const numLoops = parseInt(loopsInput.value) || 0;
+            let html = "";
+
+            if (numLoops > 0) {
+                // Generate Per-Loop Inputs
+                for (let i = 1; i <= numLoops; i++) {
+                    html += `
+                        <h3>Loop ${i}</h3>
+                        <label>Voltage Source (V):</label>
+                        <input type="number" step="any" name="voltage_${i}" required>
+                        <label>Self Resistance (Ω) (excluding shared):</label>
+                        <input type="number" step="any" name="resistance_${i}" required>
+                     `;
+                }
+
+                // Generate Shared Resistance Inputs
+                let sharedHtml = "";
+                for (let i = 1; i <= numLoops; i++) {
+                    for (let j = i + 1; j <= numLoops; j++) {
+                        sharedHtml += `
+                            <label>Shared Resistance between Loop ${i} and Loop ${j} (Ω):</label>
+                            <input type="number" step="any" name="shared_${i}_${j}" value="0">
+                         `;
+                    }
+                }
+
+                if (sharedHtml) {
+                    html += `<h3>Shared Resistances</h3>` + sharedHtml;
+                }
+
+                // Generate Target Loop Selection
+                html += `
+                    <h3>analysis Settings</h3>
+                    <label>Select Loop for Thevenin/Norton:</label>
+                    <input type="number" min="1" max="${numLoops}" name="selected_loop" value="1" required>
+                 `;
+            }
+
+            loopInputsDiv.innerHTML = html;
+        };
+
+        loopsInput.addEventListener('input', updateForm);
+    </script>
+</body>
+
+</html>

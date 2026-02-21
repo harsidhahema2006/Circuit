@@ -1,0 +1,10 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Simple Circular Background -->
+  <circle cx="32" cy="32" r="30" fill="#4F46E5"/>
+  
+  <!-- Minimalist 'M' -->
+  <path d="M20 42V22L32 34L44 22V42" stroke="white" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  
+  <!-- Small Highlight Lightning Bolt -->
+  <path d="M32 14L30 20H34L32 26" stroke="#FBBF24" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
