@@ -1,5 +1,6 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, send_from_directory
 import numpy as np
+import os
 
 app = Flask(__name__)
 
@@ -41,6 +42,17 @@ def solve_circuit(num_loops, voltage_sources, loop_resistances, shared_resistanc
         results["i_norton"] = None
 
     return results
+
+
+@app.route('/favicon.ico')
+def favicon():
+    return send_from_directory(os.path.join(app.root_path, 'public'),
+                               'favicon.ico', mimetype='image/vnd.microsoft.icon')
+
+@app.route('/favicon.svg')
+def favicon_svg():
+    return send_from_directory(os.path.join(app.root_path, 'public'),
+                               'favicon.svg', mimetype='image/svg+xml')
 
 @app.route("/", methods=["GET", "POST"])
 def index():
